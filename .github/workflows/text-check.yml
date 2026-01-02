@@ -1,25 +1,18 @@
-name: Text Validation CI
+- name: Ensure all text files end with newline
+  run: |
+    FAIL=0
+    for file in $(find . -name "*.txt"); do
+      if ! tail -c1 "$file" | read -r _; then
+        echo "❌ Missing newline at EOF: $file"
+        FAIL=1
+      else
+        echo "✅ OK: $file"
+      fi
+    done
 
-on:
-  pull_request:
-  push:
-    branches: [dev, main]
+    if [ $FAIL -eq 1 ]; then
+      echo "Text file formatting failed"
+      exit 1
+    fi
 
-jobs:
-  validate-text:
-    runs-on: ubuntu-latest
-
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Ensure all text files end with newline
-        run: |
-          FAIL=0
-          for file in $(find . -name "*.txt"); do
-            tail -c1 "$file" | read -r _ || FAIL=1
-          done
-          if [ $FAIL -eq 1 ]; then
-            echo "Text file formatting failed"
-            exit 1
-          fi
-          echo "Text validation passed"
+    echo "Text validation passed"
